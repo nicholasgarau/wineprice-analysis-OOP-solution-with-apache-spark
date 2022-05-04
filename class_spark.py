@@ -20,6 +20,7 @@ class SparkClass(object):
         self.config = path_config
         self.filename = filename
         self.infile = self.open_csv()
+        self.df_clean = self.dropper()
 
     def spark_start(self, app_name=None):
         findspark.init(self.config)
@@ -28,29 +29,16 @@ class SparkClass(object):
     def open_csv(self):
         return self.spark_start(app_name='finalproj').read.csv(self.filename, sep=',', inferSchema=True, header=True)
 
-
-class DatasetCleaner(object):
-    """A class to clean a dataset from useless elements"""
-
-    def __init__(self, dataframe:DataFrame):
-        self.dataframe = dataframe
-
     def dropnas(self):
         """A method to drop none values"""
-        self.dataframe = self.dataframe.dropna()
-        return self
+        return self.open_csv().dropna()
 
-    def dropper(self, useless_features):
+    def dropper(self,useless_feat):
         """A method to drop useless features"""
-        self.dataframe = self.dataframe.drop(useless_features)
+        self.df_clean = self.dropnas().drop(useless_feat)
         return self
 
-    def outliers_remove(self, feature, thresold):
-        """A method to remove the outliers """
-        self.dataframe = self.dataframe.filter(self.dataframe[feature] < thresold)
-        return self
+    def display(self):
+        return {f'Minca dimmi che funzioni!!\n'
+                f'{self.df_clean}'}
 
-    def __call__(self):
-        return f'Dataset pulito.\nPrime 10 righe:\n{self.dataframe.show(7)}'
-
-    #todo: cerca di chiudere questa
