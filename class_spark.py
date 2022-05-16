@@ -1,44 +1,57 @@
 import findspark
 from pyspark.sql import SparkSession
-from pyspark.sql.dataframe import DataFrame
 
-
-class SparkClass(object):
-    """a class to create a Spark environment
-    ______
-    attributes:
-    path_config = the path of the variable spark_home
-    ______
-    methods:
-    spark_start = a method to create a SparkSession
-
-    open_csv = a method that open a csv file as spark dataframe
-
+class SparkEnv(object):
     """
-
-    def __init__(self, path_config, filename):
+    A class that create a Spark environment
+    """
+    def __init__(self, app_name, path_config):
+        self.app_name = app_name
         self.config = path_config
-        self.filename = filename
-        self.infile = self.open_csv()
-        self.df_clean = self.dropper()
 
-    def spark_start(self, app_name=None):
+
+    def spark_start(self):
         findspark.init(self.config)
-        return SparkSession.builder.appName(app_name).getOrCreate()
+        spark_session = SparkSession.builder.appName(self.app_name).getOrCreate()
+        return spark_session
 
-    def open_csv(self):
-        return self.spark_start(app_name='finalproj').read.csv(self.filename, sep=',', inferSchema=True, header=True)
 
-    def dropnas(self):
-        """A method to drop none values"""
-        return self.open_csv().dropna()
+"""
+# IN VARI FILE PYTHON
 
-    def dropper(self,useless_feat):
-        """A method to drop useless features"""
-        self.df_clean = self.dropnas().drop(useless_feat)
-        return self
 
-    def display(self):
-        return {f'Minca dimmi che funzioni!!\n'
-                f'{self.df_clean}'}
+from singleton_spark import Spark
+ 
 
+...
+ 
+
+spark = Spark(appName='provaSpark')
+ 
+
+...
+ 
+
+spark.session
+ 
+
+....
+
+"""
+
+# fai diventare funzione la spark session
+
+# chiama il loader
+
+# class singleton(object):
+#     def __init__(self, cls):
+#         self.cls, self.obj = cls, None
+#         print(f"Init takes class {cls.__name__} as input ...")
+#
+#     def __call__(self, *args, **kwargs):
+#         print(f"The singleton has taken the place of the {self.cls.__name__} instance")
+#         if not self.obj: self.obj = self.cls(*args, **kwargs)
+#         return self.obj
+#
+#
+# @singleton
