@@ -10,7 +10,6 @@ class SparkEnv(object):
     path_config = the path of the SPARK_HOME
     ______
     methods:
-
     spark_start() = a method to start a Spark session
 
     """

@@ -1,5 +1,7 @@
 from class_spark import SparkEnv
 import seaborn as sns
+from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
+from pyspark.ml import Pipeline
 
 spark = SparkEnv('final_project', '/usr/local/Cellar/apache-spark/3.2.1/libexec').spark_start()
 
@@ -91,13 +93,41 @@ class Plotter(Loader):
     def box_plotter(self, column=str, color=str):
         return sns.boxplot(data=self.pandas_dataframe[column], color=color, orient='h')
 
+class PipelineCreator(object):
+    """
+    A class that creates a Pipeline and returns a spark dataframe ready to machine learning alghoritms
+    ________
+    attributes:
+    dataframe = a dataframe ready for the preprocessing
+
+    ----
+    methods:
+    pl_generator() = a method that return a pipeline ready to fit
+    pl_fitter() = a method to fit the pipeline created on pl_generator
+
+    """
+
+    def __init__(self, dataframe):
+        self.df_raw = dataframe
+        self.pipeline = self.pl_generator()
+
+    def pl_generator(self):
+        indexer = StringIndexer(inputCols=['Winery', 'Region', 'RegionalVariety', 'Year'],
+                                outputCols=['WineryNDX', 'RegionNDX', 'RegionalVarietyNDX', 'YearNDX'],
+                                handleInvalid='skip')
+        encoder = OneHotEncoder(inputCols=['WineryNDX', 'YearNDX', 'RegionNDX', 'RegionalVarietyNDX'],
+                                outputCols=(['WineryENC', 'YearENC', 'RegionENC', 'RegionalVarietyENC'])
+                                )
+        assembler = VectorAssembler(inputCols=['WineryENC', 'RegionENC', 'RegionalVarietyENC', 'YearENC',
+                                               'WineRating', 'WineRatingCount'], outputCol='features',
+                                    handleInvalid='skip')
+
+        pipeline = Pipeline(stages=[indexer, encoder, assembler])
+        return pipeline
+
+    def pl_fitter(self):
+        df_assembled = self.pipeline.fit(self.df_raw).transform(self.df_raw)
+        return df_assembled
 
 
-# if __name__ == '__main__':
-#     df = Loader('white-wine-price-rating.csv')
-#     useless_feat = ['FullName', 'VintageRating', 'VintageRatingCount', 'VintagePrice', 'VintageRatingPriceRatio',
-#                     'WineRatingPriceRatio']
-#     df = df.load_csv().dropnas().dropper(useless_feat).df_clean.show()
-#     df_pandas = Plotter('white-wine-price-rating.csv')
-#     print(df_pandas.pandas_dataframe)
 
