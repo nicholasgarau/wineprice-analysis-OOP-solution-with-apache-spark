@@ -21,9 +21,8 @@ df.load_csv().dropnas().dropper(useless_feat).df_clean.show()
 # #print(f'boxplot for WinePrice: \n {bp_price}')
 
 
-df_no_outliers = df.load_csv().dropnas().dropper(useless_feat).funnel('WineRatingCount', 8000).funnel('WinePrice', 1000)
-df_no_outliers.df_clean.show()
-print(f'Observation after the data cleaning:\t  {df_no_outliers.df_clean.count()}')
+df_no_outliers = df.load_csv().dropnas().dropper(useless_feat).funnel('WineRatingCount', 8000).funnel('WinePrice', 1000).df_clean
+print(f'Observation after the data cleaning:\t  {df_no_outliers.count()}')
 
 '''Data preprocessing '''
 
@@ -31,3 +30,7 @@ pl_df = PipelineCreator(dataframe=df_no_outliers)
 df_post_pipeline = pl_df.pl_fitter()
 df_final = df_post_pipeline.select('features', 'WinePrice')
 df_final = df_final.select('features', round(df_final['WinePrice'], 2).alias('WinePrice'))
+
+df_final.show(10)
+
+""" Linear Regression + Random Forest """
