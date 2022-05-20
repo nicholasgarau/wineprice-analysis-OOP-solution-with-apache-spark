@@ -3,6 +3,7 @@ from pyspark.ml.regression import RandomForestRegressor as RF
 from pyspark.sql.functions import round
 from pyspark.ml.evaluation import RegressionEvaluator
 import matplotlib.pyplot as plt
+from itertools import chain
 
 
 def linear_regressor(dataframe):
@@ -30,7 +31,13 @@ def random_forest_regressor(dataframe):
     plt.xlabel('Price')
     plt.ylabel('Prediction')
     plt.suptitle("Model Performance RMSE: %f" % rmse)
-    #plt.show()
-    print(f'Feature importance: \t {model_rf.featureImportances}')
-
-    #todo: sei arrivato alla feature importance
+    plt.show()
+    print(f'Feature importance values:{model_rf.featureImportances}')
+    print(f'FI values (descent order): \t  {sorted(model_rf.featureImportances.values, reverse=True)[:10]}')
+    attrs = sorted(
+        (attr["idx"], attr["name"]) for attr in (chain(*dataframe
+                                                       .schema["features"]
+                                                       .metadata["ml_attr"]["attrs"].values())))
+    feature_importance_meaning = [(name, model_rf.featureImportances[idx]) for idx, name in attrs if
+                                  model_rf.featureImportances[idx]]
+    print(f'FEATURE IMPORTANCE: \t {feature_importance_meaning}')

@@ -2,9 +2,15 @@ from class_spark import SparkEnv
 import seaborn as sns
 from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
 from pyspark.ml import Pipeline
+from pyspark.ml.feature import MinMaxScaler, RobustScaler
+from pyspark.ml.linalg import DenseVector, VectorUDT
+from pyspark.sql.functions import udf
 
 spark = SparkEnv('final_project', '/usr/local/Cellar/apache-spark/3.2.1/libexec').spark_start()
-
+as_dense = udf(
+    lambda v: DenseVector(v.toArray()) if v is not None else None,
+    VectorUDT()
+)
 
 class Loader(object):
     """a class to create a Spark environment
@@ -93,6 +99,7 @@ class Plotter(Loader):
     def box_plotter(self, column=str, color=str):
         return sns.boxplot(data=self.pandas_dataframe[column], color=color, orient='h')
 
+
 class PipelineCreator(object):
     """
     A class that creates a Pipeline and returns a spark dataframe ready to machine learning alghoritms
@@ -128,6 +135,37 @@ class PipelineCreator(object):
     def pl_fitter(self):
         df_assembled = self.pipeline.fit(self.df_raw).transform(self.df_raw)
         return df_assembled
+
+
+class Scaler(object):
+    """
+    A class to scale a Spark dataframe:
+    ______
+    attributes:
+    dataframe = the spark dataframe that going to be scaled
+    ______
+    methods:
+    min_max_scaler() = a method that return a scaled dataframe using MinMaxScaler from pyspark
+    robust_scaler() = a method that return a scaled dataframe using RobustScaler from pyspark
+
+    """
+
+    def __init__(self, dataframe):
+        self.dataframe = dataframe
+
+    def min_max_scaler(self):
+        scaler = MinMaxScaler(inputCol='features', outputCol='scaledFeatures')
+        scaled_df = scaler.fit(self.dataframe).transform(self.dataframe)
+        return scaled_df
+
+    def robust_scaler(self):
+        scaler = RobustScaler(inputCol='features', outputCol='scaledFeatures', withCentering=False)
+        scaled_df = scaler.fit(self.dataframe).transform(self.dataframe)
+        return scaled_df
+
+    def features_to_dense(self):
+        self.dataframe = self.dataframe.withColumn("features", as_dense("features"))
+        return self
 
 
 

@@ -1,5 +1,6 @@
-from load_preprocessing import PipelineCreator, Loader, Plotter
+from load_preprocessing import PipelineCreator, Loader, Plotter, Scaler
 from pyspark.sql.functions import round
+from ml_activities import linear_regressor, random_forest_regressor
 
 '''Initializing spark session and importing file (included data cleaning)'''
 
@@ -33,4 +34,27 @@ df_final = df_final.select('features', round(df_final['WinePrice'], 2).alias('Wi
 
 df_final.show(10)
 
-""" Linear Regression + Random Forest """
+""" Linear Regression + Random Forest (Not Scaled) """
+
+print('LINEAR REGRESSION (NOT SCALED) \n')
+linear_regressor(df_final)
+print('RANDOM FOREST (NOT SCALED) \n')
+random_forest_regressor(df_final)
+
+
+""" Linear Regression + Random Forest (Scaled with MinMaxScaler) """
+
+df_minmaxscaled = Scaler(df_final).min_max_scaler()
+print('LINEAR REGRESSION (MINMAXSCALED SCALED) \n')
+linear_regressor(df_minmaxscaled)
+print('RANDOM FOREST (MINMAX SCALED) \n')
+random_forest_regressor(df_minmaxscaled)
+
+""" Linear Regression + Random Forest (Scaled with RobustScaler) """
+
+# df_robusted = Scaler(df_final).features_to_dense().robust_scaler()
+# print('LINEAR REGRESSION (ROBUST SCALED) \n')
+# linear_regressor(df_robusted)
+# print('RANDOM FOREST (ROBUST SCALED) \n')
+# random_forest_regressor(df_robusted)
+
