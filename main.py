@@ -1,6 +1,6 @@
 from load_preprocessing import PipelineCreator, Loader, Plotter, Scaler
 from pyspark.sql.functions import round
-from ml_activities import linear_regressor, random_forest_regressor
+from ml_activities import linear_regressor, random_forest_regressor, subset_selection_rf
 
 '''Initializing spark session and importing file (included data cleaning)'''
 
@@ -39,7 +39,8 @@ df_final.show(10)
 print('LINEAR REGRESSION (NOT SCALED) \n')
 linear_regressor(df_final)
 print('RANDOM FOREST (NOT SCALED) \n')
-random_forest_regressor(df_final)
+rf_no_scaling = random_forest_regressor(df_final)
+print(rf_no_scaling)
 
 
 """ Linear Regression + Random Forest (Scaled with MinMaxScaler) """
@@ -48,7 +49,8 @@ df_minmaxscaled = Scaler(df_final).min_max_scaler()
 print('LINEAR REGRESSION (MINMAXSCALED SCALED) \n')
 linear_regressor(df_minmaxscaled)
 print('RANDOM FOREST (MINMAX SCALED) \n')
-random_forest_regressor(df_minmaxscaled)
+rf_no_feature_selection = random_forest_regressor(df_minmaxscaled)
+print(rf_no_feature_selection)
 
 """ Linear Regression + Random Forest (Scaled with RobustScaler) """
 
@@ -58,3 +60,6 @@ random_forest_regressor(df_minmaxscaled)
 # print('RANDOM FOREST (ROBUST SCALED) \n')
 # random_forest_regressor(df_robusted)
 
+""" random forest after susbset selection based on feature importance (no scaled data) """
+
+subset_selection_rf(rf_no_scaling, df_final)
