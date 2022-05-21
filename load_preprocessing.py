@@ -1,5 +1,6 @@
 from class_spark import SparkEnv
 import seaborn as sns
+import matplotlib.pyplot as plt
 from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import MinMaxScaler, RobustScaler
@@ -98,6 +99,8 @@ class Plotter(Loader):
 
     def box_plotter(self, column=str, color=str):
         return sns.boxplot(data=self.pandas_dataframe[column], color=color, orient='h')
+
+
 
 
 class PipelineCreator(object):
