@@ -13,6 +13,7 @@ as_dense = udf(
     VectorUDT()
 )
 
+
 class Loader(object):
     """a class to create a Spark environment
     ______
@@ -101,8 +102,6 @@ class Plotter(Loader):
         return sns.boxplot(data=self.pandas_dataframe[column], color=color, orient='h')
 
 
-
-
 class PipelineCreator(object):
     """
     A class that creates a Pipeline and returns a spark dataframe ready to machine learning alghoritms
@@ -169,6 +168,3 @@ class Scaler(object):
     def features_to_dense(self):
         self.dataframe = self.dataframe.withColumn("features", as_dense("features"))
         return self
-
-
-
