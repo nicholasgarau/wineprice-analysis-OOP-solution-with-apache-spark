@@ -44,30 +44,39 @@ class Loader(object):
     def __init__(self, filename):
         self.filename = filename
         self.dataframe = None
-        self.df_clean = None
+        self.df_cleaned = None
+        self.pandas_dataframe = None
 
     def load_csv(self):
         self.dataframe = spark.read.csv(self.filename, header=True, inferSchema=True)
+        self.dataframe = self.dataframe.dropna()
         return self
 
     def dropnas(self):
         self.dataframe = self.dataframe.dropna()
         return self
 
-    def dropper(self, useless_feat):
-        self.df_clean = self.dataframe.drop(*useless_feat)
+    def drop(self, useless_feat):
+        self.df_cleaned = self.dataframe.drop(*useless_feat)
         return self
 
     def funnel(self, column=str, max_threshold=int):
-        self.df_clean = self.df_clean.filter(self.df_clean[column] < max_threshold)
+        self.df_cleaned = self.df_cleaned.filter(self.df_cleaned[column] < max_threshold)
         return self
 
     def reverse_funnel(self, column=str, min_threshold=int):
-        self.df_clean = self.df_clean.filter(self.df_clean[column] > min_threshold)
+        self.df_cleaned = self.df_cleaned.filter(self.df_cleaned[column] > min_threshold)
         return self
 
+    def to_pandas(self):
+        self.pandas_dataframe = self.df_cleaned.toPandas()
+        return self
 
-class Plotter(Loader):
+    def show(self):
+        return self.df_cleaned.show()
+
+
+class Plotter(object):
     """
     A Loader sub-class implemented for data visualization:
     _____
@@ -87,19 +96,14 @@ class Plotter(Loader):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.pandas_dataframe = None
+    def __init__(self, dataframe):
+        self.dataframe = dataframe
 
-    def to_pandas(self):
-        self.pandas_dataframe = self.df_clean.toPandas()
-        return self
+    def displot(self, column=str, color=str, height=int):
+        return sns.displot(self.dataframe[column], aspect=2, color=color, height=height)
 
-    def distribution_plotter(self, column=str, color=str, height=int):
-        return sns.displot(self.pandas_dataframe[column], aspect=2, color=color, height=height)
-
-    def box_plotter(self, column=str, color=str):
-        return sns.boxplot(data=self.pandas_dataframe[column], color=color, orient='h')
+    def boxplot(self, column=str, color=str):
+        return sns.boxplot(data=self.dataframe[column], color=color, orient='h')
 
 
 class PipelineCreator(object):
@@ -118,9 +122,9 @@ class PipelineCreator(object):
 
     def __init__(self, dataframe):
         self.df_raw = dataframe
-        self.pipeline = self.pl_generator()
+        self.pipeline = self.make_pipeline()
 
-    def pl_generator(self):
+    def make_pipeline(self):
         indexer = StringIndexer(inputCols=['Winery', 'Region', 'RegionalVariety', 'Year'],
                                 outputCols=['WineryNDX', 'RegionNDX', 'RegionalVarietyNDX', 'YearNDX'],
                                 handleInvalid='skip')
@@ -134,9 +138,8 @@ class PipelineCreator(object):
         pipeline = Pipeline(stages=[indexer, encoder, assembler])
         return pipeline
 
-    def pl_fitter(self):
-        df_assembled = self.pipeline.fit(self.df_raw).transform(self.df_raw)
-        return df_assembled
+    def fit_transform(self):
+        return self.pipeline.fit(self.df_raw).transform(self.df_raw)
 
 
 class Scaler(object):

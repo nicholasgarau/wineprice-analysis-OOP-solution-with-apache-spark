@@ -6,28 +6,29 @@ import matplotlib.pyplot as plt
 '''Initializing spark session and importing file (included data cleaning)'''
 
 filename = 'white-wine-price-rating.csv'
-df = Loader(filename)
 useless_feat = ['FullName', 'VintageRating', 'VintageRatingCount', 'VintagePrice', 'VintageRatingPriceRatio',
                 'WineRatingPriceRatio']
-df.load_csv().dropnas().dropper(useless_feat).df_clean.show()
+loader = Loader(filename)
+loader.load_csv().drop(useless_feat).show()
 
 """Plotting the dataframe for data cleaning"""
 
-# df_pandas = Plotter(filename).load_csv().dropnas().dropper(useless_feat).to_pandas()
-# print(f'Dataframe Pandas converted:\n{df_pandas.pandas_dataframe}')
-# df_pandas.distribution_plotter('WineRating', 'red', 6)
-# df_pandas.box_plotter('WineRatingCount', 'darkred')
-# df_pandas.box_plotter('WinePrice', 'green')
+# df_plot = Plotter(loader)
+# print(f'Dataframe Pandas converted:\n{df_plot.dataframe}')
+# df_plot.displot('WineRating', 'red', 6)
+# df_plot.boxplot('WineRatingCount', 'darkred')
+# df_plot.boxplot('WinePrice', 'green')
 # plt.show()
 
 
-df_no_outliers = df.load_csv().dropnas().dropper(useless_feat).funnel('WineRatingCount', 8000).funnel('WinePrice', 1000).df_clean
+df_no_outliers = loader.funnel('WineRatingCount', 8000).funnel('WinePrice', 1000)
+df_no_outliers.show()
 print(f'Observation after the data cleaning:\t  {df_no_outliers.count()}')
 
 '''Data preprocessing '''
 
 pl_df = PipelineCreator(dataframe=df_no_outliers)
-df_post_pipeline = pl_df.pl_fitter()
+df_post_pipeline = pl_df.fit_transform()
 df_final = df_post_pipeline.select('features', 'WinePrice')
 df_final = df_final.select('features', round(df_final['WinePrice'], 2).alias('WinePrice'))
 
