@@ -21,7 +21,7 @@ loader.load_csv().drop(useless_feat).show()
 # plt.show()
 
 
-df_no_outliers = loader.funnel('WineRatingCount', 8000).funnel('WinePrice', 1000)
+df_no_outliers = loader.funnel('WineRatingCount', 8000).funnel('WinePrice', 1000).df_cleaned
 df_no_outliers.show()
 print(f'Observation after the data cleaning:\t  {df_no_outliers.count()}')
 
@@ -45,7 +45,7 @@ print(rf_no_scaling)
 
 """ Linear Regression + Random Forest (Scaled with MinMaxScaler) """
 
-df_minmaxscaled = Scaler(df_final).min_max_scaler()
+df_minmaxscaled = Scaler(df_final).min_max_scale()
 print('LINEAR REGRESSION (MINMAXSCALED SCALED) \n')
 linear_regressor(df_minmaxscaled)
 print('RANDOM FOREST (MINMAX SCALED) \n')
@@ -54,11 +54,11 @@ print(rf_no_feature_selection)
 
 """ Linear Regression + Random Forest (Scaled with RobustScaler) """
 
-# df_robusted = Scaler(df_final).features_to_dense().robust_scaler()
-# print('LINEAR REGRESSION (ROBUST SCALED) \n')
-# linear_regressor(df_robusted)
-# print('RANDOM FOREST (ROBUST SCALED) \n')
-# random_forest_regressor(df_robusted)
+df_robusted = Scaler(df_final).features_to_dense().robust_scale()
+print('LINEAR REGRESSION (ROBUST SCALED) \n')
+linear_regressor(df_robusted)
+print('RANDOM FOREST (ROBUST SCALED) \n')
+random_forest_regressor(df_robusted)
 
 """ random forest after susbset selection based on feature importance (no scaled data) """
 

@@ -1,6 +1,5 @@
 from class_spark import SparkEnv
 import seaborn as sns
-import matplotlib.pyplot as plt
 from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import MinMaxScaler, RobustScaler
@@ -25,7 +24,7 @@ class Loader(object):
 
     dropnas() = a method to drop none values
 
-    dropper() = a method to drop given columns of a dataframe
+    drop() = a method to drop given columns of a dataframe
         params:
             • useless_feat(list) = a list of strings or a string with the features to drop
 
@@ -38,6 +37,10 @@ class Loader(object):
         params:
             • column(str) = the name of the column
             • min_threshold(int) = the minimum threshold of the values to keep
+
+    to_pandas() = a method to convert a Spark dataframe to Pandas dataframe
+
+    show() = a method to print the spark dataframe
 
     """
 
@@ -81,15 +84,13 @@ class Plotter(object):
     A Loader sub-class implemented for data visualization:
     _____
     methods:
-    to_pandas() = a method to convert a Spark dataframe to Pandas dataframe
-
-    distribution_plotter() = a method to create a distribution plot
+    displot() = a method to create a distribution plot
         params:
          • column(str): the name of the column
          • color(str): the bars' color of the plot
          • height(int): the height of the plot
 
-    boxplotter() = a method to create a boxplot
+    boxplot() = a method to create a boxplot
         params:
          • column(str): the name of the column
          • color(str): the bars' color of the plot
@@ -115,8 +116,8 @@ class PipelineCreator(object):
 
     ----
     methods:
-    pl_generator() = a method that return a pipeline ready to fit
-    pl_fitter() = a method to fit the pipeline created on pl_generator
+    make_pipeline() = a method that return a pipeline ready to fit
+    fit_transform() = a method to fit and transform the pipeline created on make_pipeline()
 
     """
 
@@ -152,18 +153,19 @@ class Scaler(object):
     methods:
     min_max_scaler() = a method that return a scaled dataframe using MinMaxScaler from pyspark
     robust_scaler() = a method that return a scaled dataframe using RobustScaler from pyspark
+    features_to_dense() = a method than convert a sparse vector column as dense vector.
 
     """
 
     def __init__(self, dataframe):
         self.dataframe = dataframe
 
-    def min_max_scaler(self):
+    def min_max_scale(self):
         scaler = MinMaxScaler(inputCol='features', outputCol='scaledFeatures')
         scaled_df = scaler.fit(self.dataframe).transform(self.dataframe)
         return scaled_df
 
-    def robust_scaler(self):
+    def robust_scale(self):
         scaler = RobustScaler(inputCol='features', outputCol='scaledFeatures', withCentering=False)
         scaled_df = scaler.fit(self.dataframe).transform(self.dataframe)
         return scaled_df
