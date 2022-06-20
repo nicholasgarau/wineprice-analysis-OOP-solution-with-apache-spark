@@ -48,7 +48,7 @@ class Loader(object):
         self.filename = filename
         self.dataframe = None
         self.df_cleaned = None
-        self.pandas_dataframe = None
+
 
     def load_csv(self):
         self.dataframe = spark.read.csv(self.filename, header=True, inferSchema=True)
@@ -72,8 +72,7 @@ class Loader(object):
         return self
 
     def to_pandas(self):
-        self.pandas_dataframe = self.df_cleaned.toPandas()
-        return self
+        return self.df_cleaned.toPandas()
 
     def show(self):
         return self.df_cleaned.show()
